@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import time
 import typing
 from threading import Thread
 
+from Man10Socket.data_class.Player import Player
 from Man10Socket.utils.connection_handler.Connection import Connection
 from Man10Socket.utils.connection_handler.ConnectionHandler import ConnectionHandler
+from Man10Socket.utils.gui_manager.GUIHandler import GUIHandler
 from Man10Socket.utils.socket_functions.EventHandlerFunction import EventHandlerFunction
 from Man10Socket.utils.socket_functions.ReplyFunction import ReplyFunction
 from Man10Socket.utils.socket_functions.RequestFunction import RequestFunction
@@ -19,6 +23,8 @@ class Man10Socket:
         self.connection_handler: ConnectionHandler = ConnectionHandler()
         self.event_handler = EventHandlerFunction(self.connection_handler)
 
+        self.player_cache: dict[str, Player] = {}
+
         self.custom_request = RequestFunction()
 
         def register_functions(connection: Connection):
@@ -29,6 +35,8 @@ class Man10Socket:
         self.connection_handler.register_function_on_connect = register_functions
 
         self.connection_handler.socket_open_server("Man10Socket", host, port)
+
+        self.gui_handler = GUIHandler(self)
 
         def check_open_socket_count_thread():
             while True:
@@ -51,6 +59,15 @@ class Man10Socket:
     def initialize_connection(self):
         self.set_session_name(self.session_name)
         self.event_handler.subscribe_to_server()
+
+    def get_player(self, player_uuid: str) -> Player|None:
+        if player_uuid is None:
+            return None
+        if player_uuid in self.player_cache:
+            return self.player_cache[player_uuid]
+        player = Player(player_uuid, self)
+        self.player_cache[player_uuid] = player
+        return player
 
     def send_message(self, message: dict, reply: bool = False, callback: typing.Callable = None, reply_timeout: int = 1,
                      reply_arguments: typing.Tuple = None):

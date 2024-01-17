@@ -6,6 +6,7 @@ import threading
 import traceback
 import typing
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 from threading import Thread
 from typing import TYPE_CHECKING, Callable
@@ -20,7 +21,8 @@ if TYPE_CHECKING:
 
 class Connection:
 
-    def __init__(self, main: ConnectionHandler, socket_object: socket.socket, socket_id: str, mode: str = "server", name: str = None):
+    def __init__(self, main: ConnectionHandler, socket_object: socket.socket, socket_id: str, mode: str = "server",
+                 name: str = None):
         self.main = main
         self.socket_object = socket_object
         self.socket_id = socket_id
@@ -33,6 +35,8 @@ class Connection:
         self.reply_lock = ExpiringDict(5)
         self.reply_callback = ExpiringDict(5)
         self.reply_arguments = ExpiringDict(5)
+
+        self.executor = ThreadPoolExecutor(max_workers=20)
 
         self.message_queue = Queue()
 
@@ -107,15 +111,21 @@ class Connection:
         buffer = ""
         while True:
             try:
-                data = self.socket_object.recv(2 ** 25).decode('utf-8')
+                data = self.socket_object.recv(2**10).decode('utf-8')
                 if data:
                     buffer += data
                     while "<E>" in buffer:
                         message, buffer = buffer.split("<E>", 1)
                         try:
                             json_message = json.loads(message)
-                            # print("accepted message", json_message)
-                            self.handle_message(json_message)
+
+                            def task():
+                                self.handle_message(json_message)
+
+                            self.executor.submit(task)
+
+                            # self.handle_message(json_message)
+
                         except Exception as e:
                             print("Error parsing message:", e)
                             traceback.print_exc()
@@ -137,8 +147,6 @@ class Connection:
                     self.main.same_name_sockets[name].remove(self.socket_id)
                     if len(self.main.same_name_sockets[name]) == 0:
                         del self.main.same_name_sockets[name]
-
-
 
             print("Socket closed", self.name)
         except Exception as e:
