@@ -21,8 +21,6 @@ class RequestFunction(ConnectionFunction):
         self.mode = ["server"]
 
     def handle_message(self, connection: Connection, json_message: dict):
-        if "target" not in json_message:
-            return "invalid_args_target", None
         if "path" not in json_message:
             return "invalid_args_path", None
         if "data" not in json_message:
