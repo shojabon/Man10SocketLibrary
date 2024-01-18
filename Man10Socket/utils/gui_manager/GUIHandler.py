@@ -81,11 +81,12 @@ class GUIHandler:
             return False
         if gui.session_id not in self.__active_sessions:
             return False
+        test = gui.get_json(updated_only=True)
         a = self.main.connection_handler.get_socket("Man10Socket").send_message({
             "type": "gui_update",
             "target": target,
             "id": gui.session_id,
-            **gui.get_json()
+            **test
         }, reply=True)
         if a is None:
             return False

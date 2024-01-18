@@ -31,40 +31,52 @@ class TestInv(GUI):
             "BROWN_STAINED_GLASS_PANE",
             "GREEN_STAINED_GLASS_PANE",
             "RED_STAINED_GLASS_PANE",
-            "BLACK_STAINED_GLASS_PANE"
+            "BLACK_STAINED_GLASS_PANE",
+            "AIR"
         ]
+
+        self.materials: list[Item] = [Item().set_material(x) for x in self.materials]
 
         def render_task():
             start_time = time.time()
-            for _ in range(2):
+            for _ in range(10):
                 self.clear(push=False)
                 for x in range(54):
                     # select random material
                     random_material = self.materials[Random().randint(0, len(self.materials) - 1)]
 
-                    def on_click(event: GUIClickEvent, clicked_material=None):
-                        print("clicked_material:", clicked_material)
+                    if random_material == "AIR":
+                        self.unset_item([x], push=False)
+                        continue
 
-                    self.set_item(Item().set_material(random_material).set_display_name(random_material).set_amount(1),
+                    def on_click(event: GUIClickEvent, clicked_material: Item=None):
+                        print("clicked_material:", clicked_material.get_json())
+
+                    self.set_item(random_material.set_amount(1),
                                   [x], push=False, callback=on_click, callback_kwargs={"clicked_material": random_material})
                 self.push()
                 time.sleep(0.01)
-            elapsed_time = time.time() - start_time
-            predicted_time = 0.01 * 1000
-            print(f"elapsed_time:{elapsed_time}[sec]")
-            print(f"predicted_time:{predicted_time}[sec]")
-            print(f"diff:{elapsed_time - predicted_time}[sec]")
+
+            elpased_time = time.time() - start_time
+            predicted_time = 1000 * 0.01
+            print("elapsed_time:{0}".format(elpased_time) + "[sec]")
+            print("predicted_time:{0}".format(predicted_time) + "[sec]")
+            print("diff:{0}".format(elpased_time - predicted_time) + "[sec]")
+
+
+
 
         Thread(target=render_task, daemon=True).start()
 
-        # def click(event: GUIClickEvent):
-        #     for slot in self.route:
-        #         self.clear(push=False)
-        #         self.set_item(Item().set_material(material).set_display_name(material).set_amount(1), [slot],
-        #                       callback=click, push=True)
-        #         time.sleep(0.01)
-        #
-        # self.set_item(Item().set_material(material).set_display_name(material).set_amount(1), [0], callback=click)
+        self.route = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        def click(event: GUIClickEvent):
+            for slot in self.route:
+                self.clear(push=False)
+                self.set_item(Item().set_material(material).set_display_name(material).set_amount(1), [slot],
+                              callback=click, push=True)
+                time.sleep(0.1)
+
+        self.set_item(Item().set_material(material).set_display_name(material).set_amount(1), [0], callback=click)
 
     def on_click(self, event: GUIClickEvent):
         print(event.slot, event.action, event.click_type)

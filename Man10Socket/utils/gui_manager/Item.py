@@ -1,3 +1,5 @@
+import hashlib
+import json
 import typing
 
 
@@ -10,6 +12,7 @@ class Item:
         self.__amount = None
         self.__custom_model_data = None
         self.__type_base64 = None
+        self.__type_md5 = None
 
     def set_material(self, material: str) -> 'Item':
         self.__material = material
@@ -35,6 +38,10 @@ class Item:
         self.__type_base64 = type_base64
         return self
 
+    def set_type_md5(self, type_md5: str) -> 'Item':
+        self.__type_md5 = type_md5
+        return self
+
     def get_json(self):
         result = {
             "material": self.__material,
@@ -42,8 +49,24 @@ class Item:
             "lore": self.__lore,
             "amount": self.__amount,
             "customModelData": self.__custom_model_data,
-            "typeBase64": self.__type_base64
+            "typeBase64": self.__type_base64,
+            "typeMd5": self.__type_md5
         }
         # delete all None
         return {k: v for k, v in result.items() if v is not None}
+
+    def get_md5(self):
+        if self.__type_md5 is not None:
+            return self.__type_md5
+        else:
+            return hashlib.md5(json.dumps(self.get_json(), ensure_ascii=False).encode("utf-8")).hexdigest()
+
+    def __eq__(self, other):
+        if isinstance(other, Item):
+            return self.get_md5() == other.get_md5()
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.get_md5())
 
