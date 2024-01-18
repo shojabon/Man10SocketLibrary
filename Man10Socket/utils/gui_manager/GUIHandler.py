@@ -52,7 +52,6 @@ class GUIHandler:
             if data is None:
                 return
             session_id = data.get("id", None)
-            slot = data.get("rawSlot", None)
             player = self.main.get_player(data.get("player", None))
             session = self.get_session(session_id)
             if session is None:
@@ -65,6 +64,8 @@ class GUIHandler:
     def open_gui(self, player: Player, gui: GUI):
         session_id = str(uuid.uuid4())
         gui.session_id = session_id
+        gui.gui_handler = self
+        gui.target = player.get_uuid()
         self.__active_sessions[session_id] = gui
         a = self.main.connection_handler.get_socket("Man10Socket").send_message({
             "target": player.get_uuid(),
@@ -74,6 +75,25 @@ class GUIHandler:
             **self.get_session(session_id).get_json()
         }, reply=True)
         return a
+
+    def update_gui(self, target: str, gui: GUI):
+        if target is None:
+            return False
+        if gui.session_id not in self.__active_sessions:
+            return False
+        a = self.main.connection_handler.get_socket("Man10Socket").send_message({
+            "type": "gui_update",
+            "target": target,
+            "id": gui.session_id,
+            **gui.get_json()
+        }, reply=True)
+        if a is None:
+            return False
+        if a.get("status", None) == "error_invalid_args_id":
+            if gui.session_id in self.__active_sessions:
+                del self.__active_sessions[gui.session_id]
+            return False
+        return a.get("status", None) == "success"
 
     def get_session(self, session_id: str) -> GUI:
         return self.__active_sessions.get(session_id, None)

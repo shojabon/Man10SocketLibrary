@@ -47,7 +47,7 @@ class Connection:
             while True:
                 try:
                     message = self.message_queue.get()
-                    # print("Sent message", message)
+                    print("Sent message", message)
                     self.__send_message_internal(message)
                     self.message_queue.task_done()
                 except Exception as e:
