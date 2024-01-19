@@ -14,12 +14,12 @@ if TYPE_CHECKING:
 
 class GUI:
 
-    def __init__(self, title: str, rows: int):
+    def __init__(self, rows: int):
         self.__items: dict[int, Item] = {}
         self.__on_click_callable: dict[int, Callable[[GUIClickEvent, typing.ParamSpecKwargs], None]] = {}
         self.__on_click_kwargs: dict[int, dict] = {}
         self.__slot_updated: list[int] = []
-        self.__title = title
+        self.__title = None
         self.__rows = rows
         self.session_id = None
         self.gui_handler: GUIHandler | None = None
@@ -28,6 +28,9 @@ class GUI:
         self.__managed_threads: list[Thread] = []
 
         self.__global_air_item = Item().set_material("AIR")
+
+    def set_title(self, title: str):
+        self.__title = title
 
     def set_item(self, item: Item, slots: list[int], callback: Callable[[GUIClickEvent], None] = None,
                  push: bool = True, callback_kwargs: dict = None):
@@ -112,4 +115,11 @@ class GUI:
         thread = Thread(target=func, daemon=True, args=args)
         thread.start()
         self.__managed_threads.append(thread)
+
+    def icon(self, slots: list[int], item: Item):
+        def decorator(func: Callable[[GUIClickEvent], None]):
+            self.set_item(item, slots, func, push=False)
+            return func
+
+        return decorator
 

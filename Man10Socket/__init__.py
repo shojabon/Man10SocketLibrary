@@ -5,6 +5,7 @@ import typing
 from threading import Thread
 
 from Man10Socket.data_class.Player import Player
+from Man10Socket.utils.command_manager.CommandHandler import CommandHandler
 from Man10Socket.utils.connection_handler.Connection import Connection
 from Man10Socket.utils.connection_handler.ConnectionHandler import ConnectionHandler
 from Man10Socket.utils.gui_manager.GUIHandler import GUIHandler
@@ -22,6 +23,7 @@ class Man10Socket:
 
         self.connection_handler: ConnectionHandler = ConnectionHandler()
         self.event_handler = EventHandlerFunction(self.connection_handler)
+        self.command_handler = CommandHandler(self)
 
         self.player_cache: dict[str, Player] = {}
 
@@ -58,7 +60,9 @@ class Man10Socket:
 
     def initialize_connection(self):
         self.set_session_name(self.session_name)
+        self.command_handler.register_all_commands("man10")
         self.event_handler.subscribe_to_server()
+
 
     def get_player(self, player_uuid: str) -> Player|None:
         if player_uuid is None:

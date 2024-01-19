@@ -26,7 +26,7 @@ class EventHandlerFunction(ConnectionFunction):
 
     def handle_message(self, connection: Connection, json_message: dict):
         event_type = json_message.get("event")
-        json_message["server"] = connection.name
+        # json_message["server"] = connection.name
         if event_type in self.listeners:
             for listener in self.listeners[event_type]:
                 try:
@@ -39,9 +39,11 @@ class EventHandlerFunction(ConnectionFunction):
         if response is None or response["status"] != "success":
             self.main.get_socket("Man10Socket").socket_close()
 
-    def listener(self, event_type: str):
+    def listener(self, event_type: str, subscribe_to_server: bool = False):
         if event_type not in self.listening_event_types:
             self.listening_event_types.append(event_type)
+
+        if subscribe_to_server:
             self.subscribe_to_server()
 
         def decorator(func: Callable[[Connection, dict], None]):

@@ -5,14 +5,14 @@ import typing
 
 class Item:
 
-    def __init__(self):
-        self.__material = None
-        self.__display_name = None
-        self.__lore = None
-        self.__amount = None
-        self.__custom_model_data = None
-        self.__type_base64 = None
-        self.__type_md5 = None
+    def __init__(self, material: str = None, display_name: str = None, lore: list[str] = None, amount: int = None, custom_model_data: int = None, type_base64: str = None, type_md5: str = None):
+        self.__material = material
+        self.__display_name = display_name
+        self.__lore = lore
+        self.__amount = amount
+        self.__custom_model_data = custom_model_data
+        self.__type_base64 = type_base64
+        self.__type_md5 = type_md5
 
     def set_material(self, material: str) -> 'Item':
         self.__material = material

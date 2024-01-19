@@ -65,7 +65,7 @@ class GUIHandler:
         session_id = str(uuid.uuid4())
         gui.session_id = session_id
         gui.gui_handler = self
-        gui.target = player.get_uuid()
+        gui.target = player.get_uuid() # change to server name
         self.__active_sessions[session_id] = gui
         a = self.main.connection_handler.get_socket("Man10Socket").send_message({
             "target": player.get_uuid(),
