@@ -47,7 +47,7 @@ class Connection:
             while True:
                 try:
                     message = self.message_queue.get()
-                    print("Sent message", message)
+                    # print("Sent message", message)
                     self.__send_message_internal(message)
                     self.message_queue.task_done()
                 except Exception as e:
@@ -138,6 +138,7 @@ class Connection:
                     break
             except Exception as e:
                 print("Error receiving data:", e)
+                traceback.print_exc()
                 break
         self.socket_close()
 
@@ -147,8 +148,10 @@ class Connection:
             if self.socket_id in self.main.sockets:
                 del self.main.sockets[self.socket_id]
 
-            for name in self.main.same_name_sockets:
-                if self.socket_id in self.main.same_name_sockets[name]:
+            same_name = self.main.same_name_sockets.copy()
+
+            for name in same_name:
+                if self.socket_id in same_name[name]:
                     self.main.same_name_sockets[name].remove(self.socket_id)
                     if len(self.main.same_name_sockets[name]) == 0:
                         del self.main.same_name_sockets[name]

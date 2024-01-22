@@ -5,7 +5,6 @@ from threading import Thread
 from Man10Socket.data_class.Player import Player
 from Man10Socket.utils.gui_manager.GUI import GUI
 from Man10Socket.utils.gui_manager.GUIClickEvent import GUIClickEvent
-from Man10Socket.utils.gui_manager.Item import Item
 
 
 class TestInv(GUI):

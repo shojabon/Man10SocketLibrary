@@ -6,7 +6,7 @@ from typing import Callable, TYPE_CHECKING
 
 from Man10Socket.data_class.Player import Player
 from Man10Socket.utils.gui_manager.GUIClickEvent import GUIClickEvent
-from Man10Socket.utils.gui_manager.Item import Item
+from Man10Socket.data_class.Item import (Item)
 
 if TYPE_CHECKING:
     from Man10Socket.utils.gui_manager.GUIHandler import GUIHandler
