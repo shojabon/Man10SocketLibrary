@@ -26,7 +26,6 @@ class CommandHandler:
 
         @self.command(command=Command("testa").prefix("a").args(["command", "test", "x"]))
         def test_command(event: CommandEvent):
-            print("executed a command")
             event.get_player().send_message("aコマンドを実行しました")
 
         @self.main.event_handler.listener("player_command_send")
@@ -79,4 +78,4 @@ class CommandHandler:
                 "schema": registering_commands[registering_commands_name],
                 "target": target
             }
-            self.main.connection_handler.get_socket("Man10Socket").send_message(schema)
+            self.main.connection_handler.get_socket(target).send_message(schema)

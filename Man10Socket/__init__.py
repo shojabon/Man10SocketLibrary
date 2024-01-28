@@ -5,6 +5,7 @@ import typing
 from threading import Thread
 
 from Man10Socket.data_class.Player import Player
+from Man10Socket.utils.MinecraftServerManager import MinecraftServerManager
 from Man10Socket.utils.command_manager.CommandHandler import CommandHandler
 from Man10Socket.utils.connection_handler.Connection import Connection
 from Man10Socket.utils.connection_handler.ConnectionHandler import ConnectionHandler
@@ -23,6 +24,7 @@ class Man10Socket:
         self.connection_handler: ConnectionHandler = ConnectionHandler()
         self.event_handler = EventHandlerFunction(self.connection_handler)
         self.command_handler = CommandHandler(self)
+        self.minecraft_server_manager = MinecraftServerManager(self)
 
         self.player_cache: dict[str, Player] = {}
 
@@ -64,7 +66,8 @@ class Man10Socket:
     def initialize_connection(self):
         for host in self.hosts:
             self.set_session_name(host["name"], self.session_name)
-        # self.event_handler.subscribe_to_server()
+            self.event_handler.subscribe_to_server(host["name"])
+            self.command_handler.register_all_commands(host["name"])
 
 
     def get_player(self, player_uuid: str) -> Player|None:
@@ -78,6 +81,12 @@ class Man10Socket:
 
     def send_message(self, target: str, message: dict, reply: bool = False, callback: typing.Callable = None, reply_timeout: int = 1,
                      reply_arguments: typing.Tuple = None):
+        if target not in self.connection_handler.sockets:
+            if target in self.minecraft_server_manager.players:
+                target = self.minecraft_server_manager.players[target].get_server()
+        target_socket = self.connection_handler.get_socket(target)
+        if target_socket is None:
+            return
         return self.connection_handler.get_socket(target).send_message(message, reply, callback, reply_timeout,
                                                                               reply_arguments)
 

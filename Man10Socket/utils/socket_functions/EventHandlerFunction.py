@@ -34,10 +34,8 @@ class EventHandlerFunction(ConnectionFunction):
                 except Exception as e:
                     traceback.print_exc()
 
-    def subscribe_to_server(self):
-        response = self.main.get_socket("Man10Socket").send_message({"type": "event_subscribe", "event_types": self.listening_event_types}, reply=True)
-        if response is None or response["status"] != "success":
-            self.main.get_socket("Man10Socket").socket_close()
+    def subscribe_to_server(self, target: str = None):
+        self.main.get_socket(target).send_message({"type": "event_subscribe", "event_types": self.listening_event_types}, reply=True)
 
     def listener(self, event_type: str, subscribe_to_server: bool = False):
         if event_type not in self.listening_event_types:

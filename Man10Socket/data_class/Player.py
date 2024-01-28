@@ -14,9 +14,28 @@ class Player:
         self.__uuid = player_uuid
         self.__main: Man10Socket = main
         self.current_gui: str|None = None
+        self.__player_data: dict = {}
+
+    def set_data(self, data: dict):
+        self.__player_data = data
 
     def get_uuid(self) -> str:
         return self.__uuid
+
+    def set_server(self, server_name: str | None):
+        self.__player_data["server"] = server_name
+
+    def get_server(self):
+        return self.__player_data.get("server", None)
+
+    def get_name(self):
+        return self.__player_data["name"]
+
+    def is_online(self):
+        return self.get_server() is not None
+
+    def get_player_json(self):
+        return self.__player_data
 
     def open_gui(self, gui: GUI):
         self.__main.gui_handler.open_gui(self, gui)
